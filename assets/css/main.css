@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 142.1 70.6% 45.3%;
+    /* Emerald 600 */
+    --primary-foreground: 144.9 80.4% 10%;
+
+    --secondary: 160.5 84.1% 39.4%;
+    /* Emerald 700 */
+    --secondary-foreground: 0 0% 100%;
+
+    --background: 0 0% 100%;
+    --foreground: 160 84% 4.9%;
+
+    --muted: 161 30% 96%;
+    --muted-foreground: 161 10% 40%;
+
+    --accent: 161 30% 90%;
+    --accent-foreground: 161 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 160 84% 4.9%;
+
+    --border: 161 30% 90%;
+    --input: 161 30% 90%;
+    --ring: 142.1 70.6% 45.3%;
+
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+.glass-morphism {
+  @apply bg-white/80 backdrop-blur-xl border border-emerald-100/30 shadow-2xl;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-700;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-2xl bg-slate-900 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+}
+
+.animate-in {
+  animation: animate-in 0.5s ease-out forwards;
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
