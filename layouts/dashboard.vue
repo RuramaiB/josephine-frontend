@@ -12,33 +12,25 @@
       </div>
 
       <nav class="flex-grow px-4 py-6 space-y-1 overflow-y-auto">
-        <div class="pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Price Index</div>
+        <div class="pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Market Intelligence</div>
         <SidebarLink to="/dashboard" icon="LayoutDashboard">Market Overview</SidebarLink>
-        <SidebarLink to="/dashboard/inventory" icon="Package">Retail Prices</SidebarLink>
-        <SidebarLink to="/dashboard/analysis" icon="LineChart">Zim Analysis</SidebarLink>
+        <SidebarLink to="/dashboard/analysis" icon="LineChart">Market Analysis</SidebarLink>
+        <SidebarLink to="/dashboard/visuals" icon="Activity">Visual Representations</SidebarLink>
         
-        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Account & System</div>
-        <SidebarLink to="/dashboard/profile" icon="User">My Profile</SidebarLink>
-        <SidebarLink to="/dashboard/settings" icon="Settings">Settings</SidebarLink>
-<!--         
-        <div v-if="authStore.isAdminOrManager" class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
-           Management
-        </div>
-        <SidebarLink v-if="authStore.isAdminOrManager" to="/admin/users" icon="Users">User Management</SidebarLink> -->
+        <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Quick Actions</div>
+        <SidebarLink to="/" icon="Home">Back to Landing</SidebarLink>
+        <SidebarLink to="/dashboard/inventory" icon="Package">Retail Prices</SidebarLink>
+        <SidebarLink to="/dashboard/categories" icon="Layers">Categories & Analysis</SidebarLink>
+        <SidebarLink to="/dashboard/sources" icon="Globe">Data Source Map</SidebarLink>
       </nav>
 
-      <div class="p-6 mt-auto border-t border-white/5">
-        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5">
-          <div class="w-10 h-10 rounded-full bg-emerald-600/20 border border-emerald-600/30 flex items-center justify-center font-bold text-emerald-500 shadow-inner">
-            {{ authStore.user?.email?.charAt(0).toUpperCase() }}
+      <div class="p-8 mt-auto border-t border-white/5">
+        <div class="p-6 bg-emerald-600/10 rounded-2xl border border-emerald-500/20">
+          <p class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-2">System Status</p>
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+            <span class="text-xs font-bold text-slate-300">Public Live Node</span>
           </div>
-          <div class="flex-grow min-w-0">
-            <p class="text-sm font-bold truncate">{{ authStore.user?.email }}</p>
-            <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">{{ authStore.user?.role }}</p>
-          </div>
-          <button @click="authStore.logout" class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-all active:scale-90" title="Logout">
-             <LucideLogOut class="w-5 h-5" />
-          </button>
         </div>
       </div>
     </aside>
@@ -78,6 +70,5 @@
 </template>
 
 <script setup>
-import { LucideLayoutDashboard, LucidePackage, LucideLineChart, LucideBell, LucideUsers, LucideLogOut, LucideSearch, LucideMenu, LucideUser, LucideSettings } from 'lucide-vue-next'
-const authStore = useAuthStore()
+import { LucideLayoutDashboard, LucidePackage, LucideLineChart, LucideBell, LucideSearch, LucideMenu, LucideActivity, LucideLayers, LucideGlobe, LucideHome } from 'lucide-vue-next'
 </script>

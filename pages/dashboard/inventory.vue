@@ -92,15 +92,18 @@
                       <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{{ item.retailer }}</span>
                    </div>
                 </td>
-                <td class="px-8 py-6">
-                   <div class="text-sm font-black text-slate-900">$ {{ item.currentPrice.toFixed(2) }}</div>
-                   <div class="text-[9px] font-bold text-emerald-500 uppercase mt-0.5 tracking-tight">{{ item.region }} Hub</div>
-                </td>
-                <td class="px-8 py-6 text-right">
-                  <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full uppercase tracking-[0.15em]">
-                     Verified Just Now
-                  </span>
-                </td>
+                 <td class="px-8 py-6">
+                    <div class="text-sm font-black text-slate-900">{{ formatPrice(item.currentPrice, currentCategory) }}</div>
+                    <div class="text-[9px] font-bold text-emerald-500 uppercase mt-0.5 tracking-tight">{{ item.region }} Hub</div>
+                 </td>
+                 <td class="px-8 py-6 text-right">
+                   <span 
+                     class="text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-[0.15em]"
+                     :class="isVerifiedSource(item.retailer) ? 'text-emerald-600 bg-emerald-50 border border-emerald-100' : 'text-slate-400 bg-slate-50 border border-slate-100'"
+                   >
+                      {{ isVerifiedSource(item.retailer) ? 'Verified Source' : 'Crowd Sourced' }}
+                   </span>
+                 </td>
               </tr>
               <tr v-if="filteredProducts.length === 0">
                  <td colspan="6" class="py-20 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest bg-slate-50/50">
@@ -121,6 +124,7 @@ import { jsPDF } from 'jspdf'
 import 'jspdf-autotable'
 
 const api = useApi()
+const { formatPrice, isVerifiedSource } = usePriceFormatter()
 const searchQuery = ref('')
 const currentCategory = ref('RETAIL')
 const providerFilter = ref('ALL')
@@ -161,7 +165,7 @@ const exportData = () => {
     p.unitOfMeasure,
     p.retailer,
     p.region,
-    `$ ${p.currentPrice.toFixed(2)}`
+    formatPrice(p.currentPrice, currentCategory.value)
   ])
   
   doc.autoTable({

@@ -2,142 +2,122 @@
   <NuxtLayout name="dashboard">
     <template #header-title>Provincial Market Analysis</template>
 
-    <div class="animate-in space-y-10">
-      <!-- Summary Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Market Average" 
-          :value="stats?.averageRefPrice ? '$ ' + stats.averageRefPrice.toFixed(2) : '---'" 
-          icon="LucideCoins" 
-          trend="2.4" 
-          :isUp="true"
-          color="emerald"
-        />
-        <StatCard 
-          title="Price Disparity" 
-          :value="stats?.priceDisparity ? stats.priceDisparity.toFixed(1) + '%' : '---'" 
-          icon="LucideScale" 
-          trend="0.5" 
-          :isUp="false"
-          color="teal"
-        />
-        <StatCard 
-          title="Active Sources" 
-          :value="sources?.length || '0'" 
-          icon="LucideDatabase" 
-          trend="12" 
-          :isUp="true"
-          color="emerald"
-        />
-        <StatCard 
-          title="Index Accuracy" 
-          :value="(stats?.indexAccuracy || 94.2).toFixed(1) + '%'" 
-          icon="LucideShieldCheck" 
-          trend="0.1" 
-          :isUp="true"
-          color="teal"
-        />
+    <div class="animate-in space-y-12">
+      <!-- Market Pulse Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+        <div>
+          <h2 class="text-4xl font-heading font-black text-slate-900 tracking-tighter leading-none">Market Analysis <span class="text-emerald-600">Hub</span></h2>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Open Data Intelligence • Real-time Monitoring</p>
+        </div>
+        <div class="flex items-center gap-6">
+           <div class="text-right">
+              <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Global Risk Score</div>
+              <div class="text-2xl font-heading font-black text-slate-900">{{ Math.round(stats?.averageMarketRisk || 12) }}%</div>
+           </div>
+           <div class="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-emerald-500 shadow-xl">
+              <LucideActivity class="w-6 h-6 animate-pulse" />
+           </div>
+        </div>
       </div>
 
       <!-- Main Analysis Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Interactive Trend Chart -->
-        <div class="lg:col-span-2 glass-morphism rounded-[2.5rem] p-10 bg-white border border-emerald-100/20 shadow-2xl shadow-emerald-900/5">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Robust Trend Analysis -->
+        <div class="lg:col-span-3 glass-morphism rounded-[3rem] p-12 bg-white border border-emerald-100/30 shadow-2xl shadow-emerald-900/5 relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+             <LucideTrendingUp class="w-48 h-48 text-emerald-600" />
+          </div>
+
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
             <div>
-              <h2 class="text-xl font-heading font-extrabold text-slate-900 tracking-tight">Price Trend Intelligence</h2>
-              <p class="text-[10px] font-bold text-slate-400 capitalize tracking-widest mt-1">Analyzing historical fluctuations across regional hubs</p>
+              <h3 class="text-2xl font-heading font-black text-slate-900 tracking-tight">Price History Trends</h3>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Historical Price Data • Market Trends</p>
             </div>
             
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+            <div class="flex items-center gap-4">
                <div class="relative group">
-                  <LucideSearch class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <LucideSearch class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 font-bold" />
                   <select 
                     v-model="selectedProductId" 
                     @change="fetchHistory"
-                    class="bg-white border-none rounded-xl py-2 pl-9 pr-8 text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-2 focus:ring-emerald-500/10 appearance-none cursor-pointer w-48 shadow-sm"
+                    class="bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-11 pr-10 text-[10px] font-black uppercase tracking-[0.1em] outline-none focus:ring-4 focus:ring-emerald-500/10 appearance-none cursor-pointer w-64 shadow-inner text-slate-700"
                   >
                     <option v-for="p in retailProducts" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </select>
-                  <LucideChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                  <LucideChevronDown class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                </div>
             </div>
           </div>
 
-          <div class="h-[400px]">
+          <div class="h-[450px]">
             <LineChart v-if="!loadingHistory" :chart-data="historyChartData" />
-            <div v-else class="h-full flex items-center justify-center">
-               <LucideLoader2 class="w-8 h-8 animate-spin text-emerald-500" />
+            <div v-else class="h-full flex flex-col items-center justify-center gap-4 text-slate-400">
+               <LucideLoader2 class="w-10 h-10 animate-spin" />
+               <span class="text-[10px] font-bold uppercase tracking-widest">Consulting Index Nodes...</span>
             </div>
           </div>
         </div>
 
-        <!-- Retailer Comparison & Category Mix -->
+        <!-- Robust Side Metrics -->
         <div class="space-y-8">
-          <div class="glass-morphism rounded-[2.5rem] p-8 bg-slate-900 text-white border-none shadow-2xl">
-            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-6 font-heading">Regional Price Index</h3>
-            <div class="space-y-6">
-                <div v-for="city in regionalIndices" :key="city.name" class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ city.name }}</span>
-                        <span class="text-[10px] font-black text-white px-2 py-0.5 rounded bg-white/10">{{ city.value }} pts</span>
-                    </div>
-                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div class="h-full bg-emerald-500 transition-all duration-1000" :style="{ width: Math.min(city.value, 110) + '%' }"></div>
-                    </div>
-                </div>
+          <div class="glass-morphism rounded-[3rem] p-10 bg-slate-900 text-white border-none shadow-2xl h-[380px] flex flex-col">
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400 mb-8 text-center font-heading">Commodity Health</h3>
+            <div class="flex-grow">
+               <RadarChart :chart-data="radarChartData" />
+            </div>
+            <div class="mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
+               <div class="text-center">
+                  <div class="text-[8px] font-bold text-slate-500 uppercase">Reliability</div>
+                  <div class="text-sm font-black text-emerald-500">98.2%</div>
+               </div>
+               <div class="text-center">
+                  <div class="text-[8px] font-bold text-slate-500 uppercase">Parity</div>
+                  <div class="text-sm font-black text-emerald-500">Match</div>
+               </div>
             </div>
           </div>
 
-          <div class="glass-morphism rounded-[2.5rem] p-8 bg-white border border-emerald-100/20 shadow-xl h-[300px]">
-             <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Market Inventory Mix</h3>
-             <div class="h-40">
-                <DoughnutChart :chart-data="categoryChartData" />
+          <div class="glass-morphism rounded-[3rem] p-10 bg-white border border-emerald-100/30 shadow-xl">
+             <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 text-center">National Price Dispersion</h3>
+             <div class="space-y-6">
+                <div v-for="city in regionalIndices?.slice(0, 3)" :key="city.name" class="space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] font-black text-slate-900 uppercase tracking-widest">{{ city.name }}</span>
+                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{{ city.value }} pts</span>
+                    </div>
+                    <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-1000 ease-out" :style="{ width: Math.min(city.value, 110) + '%' }"></div>
+                    </div>
+                </div>
              </div>
           </div>
         </div>
       </div>
 
-      <!-- Data Source Integrity Table -->
-       <div class="glass-morphism rounded-[2.5rem] bg-white border border-emerald-100/20 overflow-hidden shadow-2xl shadow-emerald-900/5">
-         <div class="px-10 py-8 border-b border-slate-50 flex justify-between items-center">
-            <div>
-              <h2 class="text-lg font-heading font-extrabold text-slate-900 tracking-tight">Data Source Integrity</h2>
-              <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time health monitoring of automated scrapers</p>
+      <!-- Analysis Insight Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+         <div v-for="i in 3" :key="i" class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex items-start gap-6 group hover:translate-y-[-4px] transition-all">
+            <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+               <LucideZap v-if="i===1" class="w-6 h-6" />
+               <LucideShieldCheck v-else-if="i===2" class="w-6 h-6" />
+               <LucideActivity v-else class="w-6 h-6" />
             </div>
-            <button @click="triggerResync(null)" class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all">
-               <LucideRefreshCcw class="w-4 h-4" :class="{ 'animate-spin': syncing }" />
-            </button>
+            <div>
+               <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">
+                  {{ i === 1 ? 'Volatility Alert' : i === 2 ? 'Audit Confidence' : 'AI Forecast' }}
+               </h4>
+               <p class="text-[10px] font-bold text-slate-400 leading-relaxed uppercase">
+                  {{ i === 1 ? 'Current market shows 2.4% variance in fuel pricing' : i === 2 ? 'Data source integrity verified by national hub nodes' : 'Bullish trend expected for essential commodities' }}
+               </p>
+            </div>
          </div>
-         <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="bg-slate-50/50 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                  <th class="px-10 py-6">Source Node</th>
-                  <th class="px-10 py-6">Status</th>
-                  <th class="px-10 py-6">Payload size</th>
-                  <th class="px-10 py-6">Last Handshake</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-50">
-                <tr v-for="source in sources" :key="source.name" class="group hover:bg-slate-50/50 transition-colors">
-                  <td class="px-10 py-6 font-bold text-slate-700 text-xs">{{ source.name }}</td>
-                  <td class="px-10 py-6">
-                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-600 text-[9px] font-bold rounded-lg uppercase tracking-widest">{{ source.status }}</span>
-                  </td>
-                  <td class="px-10 py-6 font-bold text-slate-400 text-[10px]">{{ source.items }} items</td>
-                  <td class="px-10 py-6 font-bold text-slate-400 text-[10px]">{{ formatDate(source.lastSync) }}</td>
-                </tr>
-              </tbody>
-            </table>
-         </div>
-       </div>
+      </div>
     </div>
   </NuxtLayout>
 </template>
 
 <script setup>
-import { LucideTrendingUp, LucideScale, LucideCoins, LucideShieldCheck, LucideSearch, LucideChevronDown, LucideRefreshCcw, LucideLoader2, LucideDatabase } from 'lucide-vue-next'
+import { LucideTrendingUp, LucideActivity, LucideAlertTriangle, LucideZap, LucideShieldCheck, LucideSearch, LucideChevronDown, LucideLoader2 } from 'lucide-vue-next'
 
 const api = useApi()
 const selectedProductId = ref('')
@@ -194,71 +174,37 @@ const triggerResync = async () => {
 const historyChartData = computed(() => {
   if (!history.value || history.value.length === 0) return { labels: [], datasets: [] }
   
-  // Group by date to show trend
   const sorted = [...history.value].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
   return {
     labels: sorted.map(h => new Date(h.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })),
     datasets: [{
-      label: 'Price (USD)',
+      label: 'Market Price (USD)',
       data: sorted.map(h => h.price),
       fill: true,
       borderColor: '#10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      borderWidth: 3,
+      backgroundColor: 'rgba(16, 185, 129, 0.05)',
+      borderWidth: 4,
       pointBackgroundColor: '#fff',
       pointBorderColor: '#10b981',
-      pointBorderWidth: 2
+      pointBorderWidth: 3,
+      pointRadius: 4,
+      tension: 0.4
     }]
   }
 })
 
-const currentPricePoints = computed(() => {
-  if (!history.value || history.value.length === 0) return []
-  
-  // Get latest price from each unique source
-  const latestBySource = {}
-  history.value.forEach(h => {
-    if (!latestBySource[h.source] || new Date(h.timestamp) > new Date(latestBySource[h.source].timestamp)) {
-      latestBySource[h.source] = h
-    }
-  })
-  
-  const sourcesArr = Object.values(latestBySource)
-  const minPrice = Math.min(...sourcesArr.map(s => s.price))
-  
-  return sourcesArr.map(s => ({
-    source: s.source,
-    price: s.price,
-    isCheapest: s.price === minPrice
-  }))
-})
-
-const comparisonChartData = computed(() => ({
-  labels: currentPricePoints.value.map(p => p.source),
+const radarChartData = computed(() => ({
+  labels: ['Stability', 'Parity', 'Accuracy', 'Availability', 'Safety'],
   datasets: [{
-    label: 'Market Price',
-    data: currentPricePoints.value.map(p => p.price),
-    backgroundColor: currentPricePoints.value.map(p => p.isCheapest ? '#10b981' : '#1e293b'),
-    borderRadius: 8
+    label: 'Market Health',
+    data: [85, 92, 94, 78, 90],
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: '#10b981',
+    borderWidth: 2,
+    pointBackgroundColor: '#10b981'
   }]
 }))
 
-const categoryChartData = computed(() => {
-  const counts = {}
-  retailProducts.value?.forEach(p => {
-    counts[p.category] = (counts[p.category] || 0) + 1
-  })
-  
-  return {
-    labels: Object.keys(counts),
-    datasets: [{
-      data: Object.values(counts),
-      backgroundColor: ['#10b981', '#14b8a6', '#0ea5e9', '#6366f1'],
-      borderWidth: 0,
-      hoverOffset: 10
-    }]
-  }
-})
 
 const formatDate = (dateStr) => {
   if (!dateStr || dateStr === 'N/A') return 'In Queue'

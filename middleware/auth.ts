@@ -1,7 +1,12 @@
 export default defineNuxtMiddleware((to, from) => {
     const authStore = useAuthStore()
 
-    // If not authenticated, redirect to login
+    // Dashboard is now public for analytics demonstration
+    if (to.path.startsWith('/dashboard')) {
+        return
+    }
+
+    // If not authenticated, redirect to login for admin/protected zones
     if (!authStore.isAuthenticated) {
         return navigateTo('/login')
     }

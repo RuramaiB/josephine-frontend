@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { 
+  LucideZap, LucidePackage, LucideAlertTriangle, 
+  LucidePackageSearch, LucideLoader2,
+  LucideTrendingUp, LucideTrendingDown
+} from 'lucide-vue-next'
+
+const { formatPrice } = usePriceFormatter()
 
 const navLinks = [
   { name: 'Market Overview', href: '#market-overview' },
@@ -7,19 +14,19 @@ const navLinks = [
   { name: 'API Access', href: '#api' },
 ]
 
-interface PriceRecord {
+interface ProductPriceResponse {
   id: string;
-  productId: string;
-  price: number;
-  source: string;
+  name: string;
+  brand: string;
   category: string;
-  unit: string;
-  timestamp: string;
-  riskScore: number;
-  isAlert: boolean;
+  unitOfMeasure: string;
+  currentPrice: number;
+  retailer: string;
+  region: string;
+  lastUpdated: string;
 }
 
-const prices = ref<PriceRecord[]>([])
+const prices = ref<ProductPriceResponse[]>([])
 const stats = ref({
   totalRecords: 0,
   activeAlerts: 0,
@@ -60,19 +67,96 @@ const fetchCategories = async () => {
   }
 }
 
+const trends = ref([])
+const fetchTrends = async () => {
+    try {
+        const res = await fetch('http://localhost:1998/api/v1/market/trends')
+        trends.value = await res.json()
+    } catch (e) {
+        console.error('Failed to fetch trends', e)
+    }
+}
+
 onMounted(async () => {
   loading.value = true
-  await Promise.all([fetchPrices(), fetchStats(), fetchCategories()])
-  loading.value = false
+  try {
+    await Promise.all([fetchPrices(), fetchStats(), fetchCategories(), fetchTrends()])
+  } catch (e) {
+    console.error('Initial data fetch failed', e)
+  } finally {
+    loading.value = false
+  }
 
   // Refresh data every 30 seconds
   const interval = setInterval(async () => {
-    await Promise.all([fetchPrices(), fetchStats(), fetchCategories()])
+    try {
+        await Promise.all([fetchPrices(), fetchStats(), fetchCategories(), fetchTrends()])
+    } catch (e) {
+        console.error('Periodic refresh failed', e)
+    }
   }, 30000)
 
   onUnmounted(() => {
     clearInterval(interval)
   })
+})
+
+const getTrendFor = (productId: string) => {
+  return (trends.value || []).find(t => t.id === productId)
+}
+
+const { isVerifiedSource } = usePriceFormatter()
+
+const groupedPrices = computed(() => {
+  const groups: Record<string, ProductPriceResponse[]> = {}
+  
+  // For demonstration: Priority commodities (Fuel, Mealie-meal, Sugar) or National Hub
+  const demonstrationPrices = prices.value.filter(p => {
+    const s = p.retailer.toUpperCase()
+    const n = p.name.toLowerCase()
+    return isVerifiedSource(p.retailer) || 
+           n.includes('fuel') || 
+           n.includes('meal') || 
+           n.includes('sugar')
+  })
+
+  demonstrationPrices.forEach(p => {
+    if (!groups[p.category]) groups[p.category] = []
+    groups[p.category].push(p)
+  })
+  
+  // Sort each group: National Hub (Verified) first
+  Object.keys(groups).forEach(cat => {
+    groups[cat].sort((a, b) => {
+      const aOfficial = isVerifiedSource(a.retailer)
+      const bOfficial = isVerifiedSource(b.retailer)
+      if (aOfficial && !bOfficial) return -1
+      if (!aOfficial && bOfficial) return 1
+      return 0
+    })
+  })
+  
+  return groups
+})
+
+const summaryPrices = computed(() => {
+  return (prices.value || []).filter(p => {
+    const n = p.name.toLowerCase()
+    const c = p.category.toLowerCase()
+    return n.includes('fuel') || 
+           n.includes('grain') || 
+           n.includes('sugar') || 
+           n.includes('meal') ||
+           c.includes('fuel') ||
+           c.includes('grain')
+  }).sort((a, b) => {
+    // Verified sources first
+    const aOfficial = isVerifiedSource(a.retailer)
+    const bOfficial = isVerifiedSource(b.retailer)
+    if (aOfficial && !bOfficial) return -1
+    if (!aOfficial && bOfficial) return 1
+    return 0
+  }).slice(0, 12)
 })
 
 const filteredPrices = computed(() => prices.value)
@@ -98,12 +182,14 @@ const formatDate = (dateStr: string) => {
           <a v-for="link in navLinks" :key="link.name" :href="link.href" class="text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">
             {{ link.name }}
           </a>
+          <NuxtLink to="/dashboard" class="text-sm font-bold text-slate-500 hover:text-emerald-600 transition-colors">
+            Live Market Overview
+          </NuxtLink>
         </div>
 
         <div class="flex items-center gap-4">
-          <NuxtLink to="/login" class="text-sm font-bold text-slate-900 px-6 py-2.5 hover:bg-slate-50 rounded-xl transition-all">Admin Login</NuxtLink>
-          <NuxtLink to="/dashboard" class="bg-emerald-600 text-white text-sm font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:scale-[1.05] active:scale-[0.95] transition-all">
-            Dashboard
+          <NuxtLink to="/dashboard/analysis" class="bg-emerald-600 text-white text-sm font-bold px-8 py-3 rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:scale-[1.05] active:scale-[0.95] transition-all">
+            Advanced Analytics Hub
           </NuxtLink>
         </div>
       </div>
@@ -127,19 +213,19 @@ const formatDate = (dateStr: string) => {
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mt-16 animate-in [animation-delay:300ms]">
           <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div class="text-3xl font-bold text-slate-900 mb-1">{{ stats.totalRecords }}</div>
+            <div class="text-3xl font-bold text-slate-900 mb-1">{{ stats?.totalRecords || 0 }}</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Price Points</div>
           </div>
           <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div class="text-3xl font-bold text-slate-900 mb-1">{{ stats.sourcesCount }}</div>
+            <div class="text-3xl font-bold text-slate-900 mb-1">{{ stats?.sourcesCount || 0 }}</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Sources</div>
           </div>
           <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div class="text-3xl font-bold text-emerald-600 mb-1">{{ stats.activeAlerts }}</div>
+            <div class="text-3xl font-bold text-emerald-600 mb-1">{{ stats?.activeAlerts || 0 }}</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Alerts</div>
           </div>
           <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div class="text-3xl font-bold text-slate-900 mb-1">{{ Math.round(stats.averageMarketRisk) }}%</div>
+            <div class="text-3xl font-bold text-slate-900 mb-1">{{ Math.round(stats?.averageMarketRisk || 0) }}%</div>
             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Risk Score</div>
           </div>
         </div>
@@ -162,38 +248,83 @@ const formatDate = (dateStr: string) => {
           </div>
         </div>
 
-        <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-100">
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Product</th>
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Latest Price</th>
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Category</th>
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Source</th>
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Last Update</th>
-                <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Risk</th>
-              </tr>
-            </thead>
-            <tbody v-if="!loading">
-              <tr v-for="price in filteredPrices" :key="price.id" class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                <td class="px-8 py-5 font-bold text-slate-900">{{ price.productId }} <span class="text-slate-400 font-normal text-xs ml-1">({{ price.unit }})</span></td>
-                <td class="px-8 py-5 font-bold text-slate-900">${{ price.price.toFixed(2) }}</td>
-                <td class="px-8 py-5"><span class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-600">{{ price.category }}</span></td>
-                <td class="px-8 py-5 font-medium text-slate-600">{{ price.source }}</td>
-                <td class="px-8 py-5 text-slate-400 text-sm">{{ formatDate(price.timestamp) }}</td>
-                <td class="px-8 py-5">
-                  <div class="flex items-center gap-2">
-                    <div class="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div class="h-full" :class="price.riskScore > 70 ? 'bg-rose-500' : 'bg-emerald-500'" :style="`width: ${price.riskScore}%`"></div>
-                    </div>
-                    <LucideAlertTriangle v-if="price.isAlert" class="w-4 h-4 text-rose-500" />
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-if="loading" class="p-20 text-center text-slate-400 font-medium">Fetching market data...</div>
-          <div v-if="!loading && prices.length === 0" class="p-20 text-center text-slate-400 font-medium">No price data available for the selected category.</div>
+        <div v-if="loading" class="py-32 flex flex-col items-center gap-6">
+           <LucideLoader2 class="w-12 h-12 animate-spin text-emerald-500" />
+           <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">Consulting Market Indices...</p>
+        </div>
+        
+        <div v-else-if="summaryPrices.length" class="overflow-x-auto">
+          <div class="inline-block min-w-full align-middle">
+            <div class="overflow-hidden bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl shadow-slate-900/5">
+              <table class="min-w-full divide-y divide-slate-100">
+                <thead>
+                  <tr class="bg-slate-50/50">
+                    <th scope="col" class="py-6 px-10 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Product & Brand</th>
+                    <th scope="col" class="py-6 px-10 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Category</th>
+                    <th scope="col" class="py-6 px-10 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Source</th>
+                    <th scope="col" class="py-6 px-10 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Trend</th>
+                    <th scope="col" class="py-6 px-10 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Price</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                  <tr v-for="item in summaryPrices" :key="item.id" 
+                      class="group hover:bg-emerald-50/30 transition-all duration-300">
+                    <td class="py-6 px-10 whitespace-nowrap">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-white transition-colors">
+                          <LucideZap v-if="item.category === 'FUEL'" class="w-5 h-5 text-emerald-600" />
+                          <LucidePackage v-else class="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <div class="text-sm font-bold text-slate-900 leading-none mb-1.5 flex items-center gap-2">
+                             {{ item.name }}
+                             <span v-if="isVerifiedSource(item.retailer)" class="w-2 h-2 bg-emerald-500 rounded-full" title="Verified Source"></span>
+                          </div>
+                          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ item.brand }} • {{ item.unitOfMeasure }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-6 px-10 whitespace-nowrap">
+                      <span class="px-3 py-1 bg-slate-100 text-[9px] font-black text-slate-500 rounded-lg uppercase tracking-wider group-hover:bg-white transition-colors">
+                        {{ item.category }}
+                      </span>
+                    </td>
+                    <td class="py-6 px-10 whitespace-nowrap">
+                      <div class="text-xs font-bold text-slate-700 italic">{{ item.retailer }}</div>
+                      <div class="text-[9px] text-slate-400 uppercase tracking-widest mt-1">{{ item.region }}</div>
+                    </td>
+                    <td class="py-6 px-10 whitespace-nowrap text-right">
+                      <div v-if="getTrendFor(item.id)" 
+                           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight"
+                           :class="getTrendFor(item.id).trend === 'UP' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'"
+                      >
+                         <component :is="getTrendFor(item.id).trend === 'UP' ? LucideTrendingUp : LucideTrendingDown" class="w-3 h-3" />
+                         {{ Math.abs(getTrendFor(item.id).changePct).toFixed(1) }}%
+                      </div>
+                      <span v-else class="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">STABLE</span>
+                    </td>
+                    <td class="py-6 px-10 whitespace-nowrap text-right">
+                      <div class="text-xl font-heading font-black text-slate-900 tracking-tight">{{ formatPrice(item.currentPrice, item.category) }}</div>
+                      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ formatDate(item.lastUpdated).split(',')[0] }}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <div class="p-8 bg-slate-50/50 border-t border-slate-50 flex items-center justify-between">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Displaying Zimbabwe's Top essential price points</div>
+                <NuxtLink to="/dashboard" class="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-widest hover:gap-3 transition-all">
+                  View Full Analytics Hub
+                  <LucideZap class="w-4 h-4 fill-emerald-600/10" />
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else class="py-20 text-center space-y-4">
+           <LucidePackageSearch class="w-16 h-16 text-slate-200 mx-auto" />
+           <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No active commodities detected in current cycle</p>
         </div>
       </div>
     </section>

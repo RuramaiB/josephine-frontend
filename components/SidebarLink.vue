@@ -23,7 +23,12 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const isActive = computed(() => route.path === props.to || (props.to !== '/dashboard' && route.path.startsWith(props.to)))
+const isActive = computed(() => {
+  if (props.to === '/dashboard') {
+    return route.path === '/dashboard' || route.path === '/dashboard/'
+  }
+  return route.path.startsWith(props.to)
+})
 
 const iconComponent = computed(() => LucideIcons[props.icon])
 </script>
