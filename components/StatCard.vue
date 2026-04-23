@@ -49,7 +49,7 @@ import { LucideTrendingUp, LucideTrendingDown } from 'lucide-vue-next'
 
 const props = defineProps({
   title: String,
-  value: String,
+  value: [String, Number],
   icon: String,
   trend: String,
   isUp: Boolean,

@@ -59,7 +59,7 @@
 <script setup>
 const api = useApi()
 
-const { data: allPrices } = await useAsyncData('all-prices-visuals', () => $fetch('http://localhost:1998/api/public/prices'))
+const { data: allPrices } = useLazyAsyncData('all-prices-visuals', () => $fetch('http://localhost:1998/api/public/prices'))
 
 const categoryDistribution = computed(() => {
   if (!allPrices.value) return { labels: [], datasets: [] }

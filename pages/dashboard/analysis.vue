@@ -125,21 +125,26 @@ const loadingHistory = ref(false)
 const syncing = ref(false)
 
 // Data fetching
-const { data: sources, refresh: refreshSources } = await useAsyncData('data-sources', () => api.getDataSources())
-const { data: stats, refresh: refreshStats } = await useAsyncData('market-stats', () => api.getMarketStats())
-const { data: retailProducts } = await useAsyncData('retail-products', () => api.getMarketProducts('RETAIL'))
-const { data: regionalIndices, refresh: refreshIndices } = await useAsyncData('regional-indices', () => api.getRegionalIndices())
+// Data fetching
+const { data: sources, refresh: refreshSources } = useLazyAsyncData('data-sources', () => api.getDataSources())
+const { data: stats, refresh: refreshStats } = useLazyAsyncData('market-stats', () => api.getMarketStats())
+const { data: retailProducts, pending: productsPending } = useLazyAsyncData('retail-products', () => api.getMarketProducts('RETAIL'))
+const { data: regionalIndices, refresh: refreshIndices } = useLazyAsyncData('regional-indices', () => api.getRegionalIndices())
 const history = ref([])
 
-onMounted(async () => {
-  if (retailProducts.value && retailProducts.value.length > 0) {
-    selectedProductId.value = retailProducts.value[0].id
-    await fetchHistory()
+// Watch for products to arrive lazily
+watch(retailProducts, (newProducts) => {
+  if (newProducts?.length > 0 && !selectedProductId.value) {
+    selectedProductId.value = newProducts[0].id
+    fetchHistory()
   }
+}, { immediate: true })
 
+onMounted(() => {
   const interval = setInterval(() => {
     refreshSources()
     refreshStats()
+    refreshIndices()
   }, 30000)
 
   onUnmounted(() => clearInterval(interval))

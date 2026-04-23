@@ -15,6 +15,7 @@
         <div class="pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Market Intelligence</div>
         <SidebarLink to="/dashboard" icon="LayoutDashboard">Market Overview</SidebarLink>
         <SidebarLink to="/dashboard/analysis" icon="LineChart">Market Analysis</SidebarLink>
+        <SidebarLink to="/dashboard/evaluation" icon="CheckCircle">Model Evaluation</SidebarLink>
         <SidebarLink to="/dashboard/visuals" icon="Activity">Visual Representations</SidebarLink>
         
         <div class="pt-8 pb-3 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Quick Actions</div>
@@ -70,5 +71,5 @@
 </template>
 
 <script setup>
-import { LucideLayoutDashboard, LucidePackage, LucideLineChart, LucideBell, LucideSearch, LucideMenu, LucideActivity, LucideLayers, LucideGlobe, LucideHome } from 'lucide-vue-next'
+import { LucideLayoutDashboard, LucidePackage, LucideLineChart, LucideBell, LucideSearch, LucideMenu, LucideActivity, LucideLayers, LucideGlobe, LucideHome, LucideCheckCircle } from 'lucide-vue-next'
 </script>

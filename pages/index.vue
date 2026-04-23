@@ -3,7 +3,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { 
   LucideZap, LucidePackage, LucideAlertTriangle, 
   LucidePackageSearch, LucideLoader2,
-  LucideTrendingUp, LucideTrendingDown
+  LucideTrendingUp, LucideTrendingDown, LucideArrowLeftRight
 } from 'lucide-vue-next'
 
 const { formatPrice } = usePriceFormatter()
@@ -11,6 +11,7 @@ const { formatPrice } = usePriceFormatter()
 const navLinks = [
   { name: 'Market Overview', href: '#market-overview' },
   { name: 'Trends', href: '#trends' },
+  { name: 'Comparison', href: '/compare' },
   { name: 'API Access', href: '#api' },
 ]
 
@@ -230,6 +231,35 @@ const formatDate = (dateStr: string) => {
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Comparison Hub Teaser -->
+    <section class="py-12 bg-slate-50">
+       <div class="max-w-7xl mx-auto px-6">
+          <div class="bg-emerald-600 rounded-[2.5rem] p-12 text-white relative overflow-hidden shadow-2xl shadow-emerald-200">
+             <div class="absolute -right-20 -bottom-20 opacity-10">
+                <LucideArrowLeftRight class="w-80 h-80" />
+             </div>
+             <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                   <h2 class="text-4xl font-heading font-black tracking-tight">Cross-Retailer <br />Comparison Hub</h2>
+                   <p class="text-emerald-100 text-lg">Select any two data sources (e.g. TM vs Pick n Pay) and instantly compare pricing for identical commodity nodes.</p>
+                   <NuxtLink to="/compare" class="inline-flex items-center gap-3 bg-white text-emerald-600 px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all">
+                      Launch Comparison Tool
+                      <LucideArrowLeftRight class="w-4 h-4" />
+                   </NuxtLink>
+                </div>
+                <div class="hidden md:block">
+                   <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
+                      <div class="space-y-4 opacity-50">
+                         <div class="h-4 w-3/4 bg-white/20 rounded-full"></div>
+                         <div class="h-4 w-1/2 bg-white/20 rounded-full"></div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+       </div>
     </section>
 
     <!-- Market Overview -->

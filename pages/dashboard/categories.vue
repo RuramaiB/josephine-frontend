@@ -43,7 +43,7 @@
 <script setup>
 import { LucideLayers, LucideFuel, LucidePackage } from 'lucide-vue-next'
 
-const { data: allPrices } = await useAsyncData('all-prices-categories', () => $fetch('http://localhost:1998/api/public/prices'))
+const { data: allPrices } = useLazyAsyncData('all-prices-categories', () => $fetch('http://localhost:1998/api/public/prices'))
 
 const sectorSummaries = computed(() => {
   if (!allPrices.value) return []
