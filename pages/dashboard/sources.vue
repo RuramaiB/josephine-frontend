@@ -20,16 +20,7 @@
           <h3 class="text-xl font-heading font-black text-slate-900 mb-2">{{ source.name }}</h3>
           <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">{{ source.region }} Node</p>
           
-          <div class="flex items-center gap-4 pt-6 border-t border-slate-50">
-             <div>
-                <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Trust Index</div>
-                <div class="text-md font-black text-slate-900">{{ source.trust }}%</div>
-             </div>
-             <div class="ml-auto text-right">
-                <div class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Latency</div>
-                <div class="text-md font-black text-emerald-500">{{ source.latency }}ms</div>
-             </div>
-          </div>
+          <!-- Removed Trust Index and Latency -->
         </div>
       </div>
     </div>
