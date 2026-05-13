@@ -87,6 +87,52 @@
               </div>
            </div>
         </div>
+        
+        <!-- Analytical Transparency Hub -->
+        <div class="bg-slate-900 rounded-2xl p-6 text-slate-300 font-mono text-xs shadow-xl border border-slate-800">
+          <div class="flex items-center gap-3 mb-4 text-emerald-400">
+            <LucideCode class="w-4 h-4" />
+            <span class="text-[10px] font-black uppercase tracking-[0.2em]">Analytical Transparency Hub</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-4">
+               <div>
+                 <div class="text-[9px] text-slate-500 mb-1">MARKET_AVG_CALCULATION</div>
+                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">Sum(Prices) / n</span>
+                    <span class="text-white font-bold">{{ formatPrice(stats.avg) }}</span>
+                 </div>
+               </div>
+               <div>
+                 <div class="text-[9px] text-slate-500 mb-1">VARIANCE_INDEX_MATH</div>
+                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">(Max - Min) / Avg</span>
+                    <span class="text-white font-bold">{{ ((stats.max - stats.min) / (stats.avg || 1) * 100).toFixed(1) }}%</span>
+                 </div>
+               </div>
+            </div>
+            <div class="space-y-4">
+               <div>
+                 <div class="text-[9px] text-slate-500 mb-1">STABILITY_ALGORITHM</div>
+                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">1.0 - (Variance / 1.0)</span>
+                    <span class="font-bold" :class="fairness.color">{{ (100 - (stats.max - stats.min) / (stats.avg || 1) * 100).toFixed(1) }}% Stability</span>
+                 </div>
+               </div>
+               <div>
+                 <div class="text-[9px] text-slate-500 mb-1">RISK_THRESHOLD_PROTOCOL</div>
+                 <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <span class="text-slate-400">Mapped Status</span>
+                    <span class="font-bold uppercase tracking-widest text-[10px]" :class="fairness.color">{{ fairness.text }}</span>
+                 </div>
+               </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-[8px] text-slate-500">
+            <span>DATASET_SIZE: {{ products.length }} ENTRIES</span>
+            <span>ALGORITHM_VERSION: 2.1.0-STABLE</span>
+          </div>
+        </div>
 
         <!-- Detailed Provider List -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -101,33 +147,53 @@
                     <th class="py-4 px-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Retailer</th>
                     <th class="py-4 px-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Risk/Alert</th>
                     <th class="py-4 px-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</th>
+                    <th class="py-4 px-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Source</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50 bg-white">
-                  <tr v-for="item in products" :key="item.id" class="hover:bg-slate-50 transition-colors">
+                  <tr v-for="group in groupedProducts" :key="group.name" class="hover:bg-slate-50 transition-colors">
                     <td class="py-4 px-6">
-                      <div class="text-sm font-bold text-slate-900">{{ item.name }}</div>
-                      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{{ item.brand }} • {{ item.unitOfMeasure }}</div>
+                      <div class="text-sm font-bold text-slate-900">{{ group.name }}</div>
+                      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{{ group.brand }} • {{ group.unit }}</div>
+                      <div v-if="group.retailers.length > 1" class="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[8px] font-black uppercase tracking-tighter">
+                         <LucideLayers class="w-2.5 h-2.5" /> Found in {{ group.retailers.length }} shops
+                      </div>
                     </td>
                     <td class="py-4 px-6">
-                      <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
-                        {{ item.retailer }}
-                        <span v-if="isVerifiedSource(item.retailer)" class="w-1.5 h-1.5 bg-emerald-500 rounded-full" title="Verified Source"></span>
+                      <div class="space-y-2">
+                         <div v-for="item in group.retailers" :key="item.retailer" class="flex items-center justify-between gap-4">
+                            <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                               {{ item.retailer }}
+                               <span v-if="isVerifiedSource(item.retailer)" class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                               <div class="text-sm font-black text-slate-900">{{ formatPrice(item.price) }}</div>
+                               <a v-if="item.link" :href="item.link" target="_blank" class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-600 transition-colors">
+                                  <LucideExternalLink class="w-3 h-3" />
+                               </a>
+                            </div>
+                         </div>
                       </div>
-                      <div class="text-[9px] text-slate-400 uppercase tracking-widest mt-1">{{ item.region }}</div>
                     </td>
                     <td class="py-4 px-6 text-right">
-                       <span v-if="isOverpriced(getProductPrice(item), stats.avg)" class="inline-flex items-center gap-1 text-[9px] font-black bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                         <LucideAlertTriangle class="w-3 h-3" /> Overpriced
-                       </span>
-                       <span v-else class="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                         <LucideShieldCheck class="w-3 h-3" /> Fair
-                       </span>
+                       <div class="flex flex-col items-end gap-1">
+                          <div v-if="group.retailers.length > 1" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                             Var: {{ ((group.max - group.min) / group.min * 100).toFixed(1) }}%
+                          </div>
+                          <span v-if="group.max > stats.avg * 1.15" class="inline-flex items-center gap-1 text-[9px] font-black bg-rose-50 text-rose-600 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                            <LucideAlertTriangle class="w-3 h-3" /> Potential Gouging
+                          </span>
+                          <span v-else class="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                            <LucideShieldCheck class="w-3 h-3" /> Stable Market
+                          </span>
+                       </div>
                     </td>
                     <td class="py-4 px-6 text-right">
-                      <div class="text-lg font-black text-slate-900" :class="{ 'text-rose-600': isOverpriced(getProductPrice(item), stats.avg) }">
-                        {{ formatPrice(getProductPrice(item)) }}
-                      </div>
+                       <div class="text-lg font-black text-slate-900">{{ formatPrice(group.min) }}</div>
+                       <div class="text-[8px] font-bold text-emerald-600 uppercase">Best Price</div>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                       <div class="w-2 h-2 rounded-full mx-auto" :class="group.retailers.length > 1 ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-slate-200'"></div>
                     </td>
                   </tr>
                 </tbody>
@@ -142,7 +208,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { LucideX, LucideLayers, LucideAlertTriangle, LucideShieldCheck } from 'lucide-vue-next'
+import { LucideX, LucideLayers, LucideAlertTriangle, LucideShieldCheck, LucideExternalLink, LucideCode } from 'lucide-vue-next'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -173,6 +239,32 @@ const stats = computed(() => {
   const avg = pricesList.reduce((a, b) => a + b, 0) / pricesList.length
   
   return { min, max, avg }
+})
+
+const groupedProducts = computed(() => {
+  const groups = {}
+  props.products.forEach(p => {
+    const name = p.name
+    if (!groups[name]) {
+      groups[name] = {
+        name: p.name,
+        brand: p.brand,
+        unit: p.unitOfMeasure,
+        retailers: [],
+        min: Infinity,
+        max: -Infinity
+      }
+    }
+    const price = getProductPrice(p)
+    groups[name].retailers.push({
+      retailer: p.retailer,
+      price: price,
+      link: p.link
+    })
+    groups[name].min = Math.min(groups[name].min, price)
+    groups[name].max = Math.max(groups[name].max, price)
+  })
+  return Object.values(groups).sort((a, b) => b.retailers.length - a.retailers.length)
 })
 
 const providerAverages = computed(() => {

@@ -60,6 +60,7 @@
                 <th class="px-8 py-6">Unit</th>
                 <th class="px-8 py-6">Data Source</th>
                 <th class="px-8 py-6">Current Price</th>
+                <th class="px-8 py-6">Source</th>
                 <th class="px-8 py-6 text-right">Verification</th>
               </tr>
             </thead>
@@ -93,8 +94,13 @@
                    </div>
                 </td>
                  <td class="px-8 py-6">
-                    <div class="text-sm font-black text-slate-900">{{ formatPrice(item.currentPrice, currentCategory) }}</div>
                     <div class="text-[9px] font-bold text-emerald-500 uppercase mt-0.5 tracking-tight">{{ item.region }} Hub</div>
+                 </td>
+                 <td class="px-8 py-6">
+                    <a v-if="item.link" :href="item.link" target="_blank" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-emerald-600 hover:text-white transition-all shadow-sm group/link">
+                       <LucideExternalLink class="w-4 h-4 group-hover/link:scale-110 transition-transform" />
+                    </a>
+                    <span v-else class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">N/A</span>
                  </td>
                  <td class="px-8 py-6 text-right">
                    <span 
@@ -119,7 +125,7 @@
 </template>
 
 <script setup>
-import { LucideSearch, LucideLoader2, LucideDownload, LucideChevronDown, LucideChrome, LucideZap, LucideUserCheck } from 'lucide-vue-next'
+import { LucideSearch, LucideLoader2, LucideDownload, LucideChevronDown, LucideChrome, LucideZap, LucideUserCheck, LucideExternalLink } from 'lucide-vue-next'
 import { jsPDF } from 'jspdf'
 import 'jspdf-autotable'
 

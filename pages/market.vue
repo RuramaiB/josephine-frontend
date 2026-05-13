@@ -1,13 +1,38 @@
 <template>
   <div class="py-12 bg-slate-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="flex justify-between items-end mb-12">
+      <div class="flex justify-between items-start mb-12">
         <div>
           <h2 class="text-3xl font-heading font-extrabold text-slate-900 mb-2">Live Market Overview</h2>
           <p class="text-slate-500">Latest pricing data aggregated from multiple verified sources.</p>
+          
+          <!-- Official Source Nodes -->
+          <div class="mt-6 flex flex-wrap gap-4 items-center">
+             <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Scrape Nodes:</span>
+             <a href="https://tmpnponline.co.zw/" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-500 transition-all shadow-sm group">
+               <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full group-hover:animate-ping"></span>
+               TM PICK N PAY
+               <LucideExternalLink class="w-3 h-3 opacity-50" />
+             </a>
+             <a href="https://www.spar.co.zw/products/department/1/groceries" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-500 transition-all shadow-sm group">
+               <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full group-hover:animate-ping"></span>
+               SPAR ZIMBABWE
+               <LucideExternalLink class="w-3 h-3 opacity-50" />
+             </a>
+             <a href="https://www.okzim.co.zw/" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-500 transition-all shadow-sm group">
+               <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+               OK ZIMBABWE
+               <LucideExternalLink class="w-3 h-3 opacity-50" />
+             </a>
+             <a href="https://www.choppies.co.bw/" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-500 transition-all shadow-sm group">
+               <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+               CHOPPIES
+               <LucideExternalLink class="w-3 h-3 opacity-50" />
+             </a>
+          </div>
         </div>
         <div class="flex gap-4">
-           <select v-model="selectedCategory" @change="fetchPrices" class="bg-white border border-slate-200 text-sm font-bold px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20">
+           <select v-model="selectedCategory" @change="fetchPrices" class="bg-white border border-slate-200 text-sm font-bold px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-sm">
              <option value="">All Categories</option>
              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
            </select>
@@ -72,7 +97,7 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { 
   LucideZap, LucidePackage, LucidePackageSearch, 
-  LucideLoader2, LucideArrowLeftRight
+  LucideLoader2, LucideArrowLeftRight, LucideExternalLink
 } from 'lucide-vue-next'
 
 const prices = ref([])
